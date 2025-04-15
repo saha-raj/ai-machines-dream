@@ -1,9 +1,9 @@
 {
-    "prompt": "the raven",
+    "prompt": "dream within a dream",
     "notes": {
         "embedding_pca": "PCA fitted on 14431 word embeddings (128D) to 3D.",
         "trajectory_projection": "Hidden states (256D) projected to 128D via truncation.",
-        "trajectory_pca": "Trajectory PCA applied, but input had only 2 samples (< 3). Results might be unreliable."
+        "trajectory_pca": "Trajectory points transformed using PCA fitted on embeddings (after truncation. projection)."
     },
     "embeddings": [
         {
@@ -86596,65 +86596,209 @@
     "trajectory": [
         {
             "step": 0,
-            "input_word": "the",
-            "input_token_id": 2,
+            "input_word": "dream",
+            "input_token_id": 182,
             "hidden_state_3d": {
-                "x": 0.45527049292159594,
-                "y": 0.13324193828580766,
-                "z": 0.15809899361116803
+                "x": 0.25402313470840454,
+                "y": 0.028280746191740036,
+                "z": 0.0740317851305008
             },
             "top_k_predictions": [
                 {
-                    "word": "most",
-                    "score": 0.24532926082611084
+                    "word": "should",
+                    "score": 0.26653337478637695
                 },
                 {
-                    "word": "only",
-                    "score": 0.1627841293811798
+                    "word": "who",
+                    "score": 0.2643125057220459
                 },
                 {
-                    "word": "first",
-                    "score": 0.13657820224761963
+                    "word": "was",
+                    "score": 0.2623291015625
                 },
                 {
-                    "word": "old",
-                    "score": 0.12336468696594238
+                    "word": "at",
+                    "score": 0.25679802894592285
                 },
                 {
-                    "word": "whole",
-                    "score": 0.12257136404514313
+                    "word": "here",
+                    "score": 0.25441062450408936
+                },
+                {
+                    "word": "now",
+                    "score": 0.25073865056037903
+                },
+                {
+                    "word": "is",
+                    "score": 0.24548235535621643
+                },
+                {
+                    "word": "had",
+                    "score": 0.24506022036075592
+                },
+                {
+                    "word": "then",
+                    "score": 0.24408702552318573
+                },
+                {
+                    "word": "are",
+                    "score": 0.2435632348060608
                 }
             ]
         },
         {
             "step": 1,
-            "input_word": "raven",
-            "input_token_id": 87,
+            "input_word": "within",
+            "input_token_id": 326,
             "hidden_state_3d": {
-                "x": 0.2885823949647984,
-                "y": 0.1515405598536691,
-                "z": 0.01598580924613864
+                "x": 0.5407629013061523,
+                "y": -0.06817437708377838,
+                "z": 0.043309420347213745
+            },
+            "top_k_predictions": [
+                {
+                    "word": "the",
+                    "score": 0.3637426793575287
+                },
+                {
+                    "word": "this",
+                    "score": 0.2979698181152344
+                },
+                {
+                    "word": "all",
+                    "score": 0.2888072431087494
+                },
+                {
+                    "word": "my",
+                    "score": 0.2703612446784973
+                },
+                {
+                    "word": "a",
+                    "score": 0.24164357781410217
+                },
+                {
+                    "word": "his",
+                    "score": 0.22230307757854462
+                },
+                {
+                    "word": "its",
+                    "score": 0.21968674659729004
+                },
+                {
+                    "word": "our",
+                    "score": 0.21777474880218506
+                },
+                {
+                    "word": "her",
+                    "score": 0.19650718569755554
+                },
+                {
+                    "word": "their",
+                    "score": 0.1788594126701355
+                }
+            ]
+        },
+        {
+            "step": 2,
+            "input_word": "a",
+            "input_token_id": 93,
+            "hidden_state_3d": {
+                "x": 0.7370545864105225,
+                "y": -0.39227771759033203,
+                "z": 0.6045055389404297
+            },
+            "top_k_predictions": [
+                {
+                    "word": "very",
+                    "score": 0.27093276381492615
+                },
+                {
+                    "word": "few",
+                    "score": 0.1940043866634369
+                },
+                {
+                    "word": "long",
+                    "score": 0.19249990582466125
+                },
+                {
+                    "word": "great",
+                    "score": 0.16869458556175232
+                },
+                {
+                    "word": "small",
+                    "score": 0.14183169603347778
+                },
+                {
+                    "word": "little",
+                    "score": 0.13482940196990967
+                },
+                {
+                    "word": "certain",
+                    "score": 0.12794694304466248
+                },
+                {
+                    "word": "single",
+                    "score": 0.12509596347808838
+                },
+                {
+                    "word": "second",
+                    "score": 0.12084951996803284
+                },
+                {
+                    "word": "high",
+                    "score": 0.11414249241352081
+                }
+            ]
+        },
+        {
+            "step": 3,
+            "input_word": "dream",
+            "input_token_id": 182,
+            "hidden_state_3d": {
+                "x": 0.46769988536834717,
+                "y": 0.17342053353786469,
+                "z": -0.008021343499422073
             },
             "top_k_predictions": [
                 {
                     "word": "of",
-                    "score": 0.32193249464035034
-                },
-                {
-                    "word": "and",
-                    "score": 0.2056811898946762
-                },
-                {
-                    "word": "is",
-                    "score": 0.15710589289665222
-                },
-                {
-                    "word": "was",
-                    "score": 0.13673901557922363
+                    "score": 0.27791011333465576
                 },
                 {
                     "word": "or",
-                    "score": 0.11284930258989334
+                    "score": 0.24265973269939423
+                },
+                {
+                    "word": "is",
+                    "score": 0.2362300157546997
+                },
+                {
+                    "word": "so",
+                    "score": 0.22321583330631256
+                },
+                {
+                    "word": "i",
+                    "score": 0.22108414769172668
+                },
+                {
+                    "word": ".",
+                    "score": 0.2176976352930069
+                },
+                {
+                    "word": "in",
+                    "score": 0.21701739728450775
+                },
+                {
+                    "word": "which",
+                    "score": 0.21079638600349426
+                },
+                {
+                    "word": "for",
+                    "score": 0.19616292417049408
+                },
+                {
+                    "word": "with",
+                    "score": 0.19021859765052795
                 }
             ]
         }
