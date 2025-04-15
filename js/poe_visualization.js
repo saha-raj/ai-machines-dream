@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
             trajectoryLine: 0x555555, // Dark Gray
             predictionLine: 0x888888, // Slightly lighter dark Gray for visibility check
             trajectoryWordText: 'rgba(0, 0, 0, 0.8)', // Black
-            trajectoryWordBg: 'rgba(220, 220, 220, 0.6)', // Increased alpha from 0.2 to 0.6
+            trajectoryWordBg: 'rgba(220, 220, 220, 0.2)', // Increased alpha from 0.2 to 0.6
             predictedWordText: 'rgba(58, 134, 255, 0.9)', // Blue
             sampledWordText: 'rgba(51, 51, 51, 0.4)', // Dark Gray (#333), semi-transparent
         },
@@ -51,9 +51,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Scene Setup (Three.js) ---
     let scene, camera, renderer, controls;
-    let embeddingsGroup, trajectoryGroup, predictionLinesGroup; // Groups for objects
+    let embeddingsGroup, trajectoryGroup, predictionLinesGroup, tempLabelGroup; // Added tempLabelGroup
     let allEmbeddingData = []; // Store full embedding data for lookups
     let wordToEmbeddingMap = new Map(); // Map word strings to {x, y, z} objects
+    let pointsObject = null; // Reference to the THREE.Points object
+    let pointEmbeddings = []; // Store the subset of embeddings used for the Points object
+
+    // --- Raycasting Setup ---
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let currentlyDisplayedLabel = null; // Reference to the temporary label sprite
 
     function initThreeJS() {
         const width = container.clientWidth;
@@ -91,9 +98,15 @@ document.addEventListener('DOMContentLoaded', function() {
         embeddingsGroup = new THREE.Group();
         trajectoryGroup = new THREE.Group();
         predictionLinesGroup = new THREE.Group();
+        tempLabelGroup = new THREE.Group(); // Group for temporary labels
         scene.add(embeddingsGroup);
         scene.add(trajectoryGroup);
         scene.add(predictionLinesGroup);
+        scene.add(tempLabelGroup); // Add the temp label group to the scene
+
+        // --- Add Event Listeners ---
+        renderer.domElement.addEventListener('click', onMouseClick, false);
+        window.addEventListener('keydown', onEscapeKey, false); // Add listener for Escape key
 
         window.addEventListener('resize', onWindowResize, false);
         animate();
@@ -205,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Display PCA note
                 if (data.notes && data.notes.trajectory_pca) {
-                    pcaNoteDisplay.textContent = `${data.notes.embedding_pca} ${data.notes.trajectory_projection} ${data.notes.trajectory_pca}`;
+                    pcaNoteDisplay.textContent = `PCA Notes: ${data.notes.embedding_pca} ${data.notes.trajectory_projection} ${data.notes.trajectory_pca}`;
                  }
 
                 // --- Extract Top Predicted Words from Last Step ---
@@ -246,14 +259,12 @@ document.addEventListener('DOMContentLoaded', function() {
              while (group.children.length > 0) {
                  const child = group.children[0];
                  group.remove(child);
-                 // Dispose geometry and material if necessary (important for memory management)
+                 // Dispose geometry and material if necessary
                  if (child.geometry) child.geometry.dispose();
                  if (child.material) {
-                     // Check if material is an array (like MultiMaterial)
                      if (Array.isArray(child.material)) {
                          child.material.forEach(m => m.dispose());
                      } else {
-                         // Dispose texture if present
                          if (child.material.map) child.material.map.dispose();
                          child.material.dispose();
                      }
@@ -262,12 +273,17 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         clearGroup(embeddingsGroup);
         clearGroup(trajectoryGroup);
-        clearGroup(predictionLinesGroup); // Clear prediction lines too
-        allEmbeddingData = []; // Clear stored data
-        wordToEmbeddingMap.clear(); // Clear the map
+        clearGroup(predictionLinesGroup);
+        clearGroup(tempLabelGroup); // Clear temporary labels
+        allEmbeddingData = [];
+        wordToEmbeddingMap.clear();
+        pointsObject = null; // Reset reference
+        pointEmbeddings = []; // Reset point data store
+        currentlyDisplayedLabel = null; // Reset temp label reference
     }
 
     function visualizeEmbeddings(embeddings, topPredictedWords) {
+        pointEmbeddings = []; // Clear before populating
         const pointPositions = [];
         const sampleRate = config.sampleRate;
         let greySpriteCount = 0;
@@ -280,9 +296,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (topPredictedWords.has(word)) {
                 // ALWAYS show top predicted words as BLUE sprites (fully opaque)
                 const sprite = createTextSprite(word, {
-                    fontsize: config.font.baseSize, // Use base size
+                    fontsize: config.font.baseSize,
                     scale: config.scale.predictedWordSprite,
-                    fontColor: config.colors.predictedWordText // Blue, Opaque
+                    fontColor: config.colors.predictedWordText
                 });
                 sprite.position.set(position.x, position.y, position.z);
                 embeddingsGroup.add(sprite);
@@ -294,14 +310,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     const sprite = createTextSprite(word, {
                         fontsize: config.font.baseSize,
                         scale: config.scale.sampledWordSprite,
-                        fontColor: config.colors.sampledWordText // #333 with 0.4 opacity from config
+                        fontColor: config.colors.sampledWordText
                     });
                     sprite.position.set(position.x, position.y, position.z);
                     embeddingsGroup.add(sprite);
                     greySpriteCount++;
                 } else {
-                    // Show as a grey point
+                    // Store data for grey point and add position
                     pointPositions.push(position.x, position.y, position.z);
+                    // Keep track of which embedding corresponds to this point's index
+                    pointEmbeddings.push(embedding);
                 }
             }
         });
@@ -317,11 +335,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 transparent: true,
                 opacity: config.opacity.points
             });
-            const points = new THREE.Points(pointGeometry, pointMaterial);
-            embeddingsGroup.add(points);
+            pointsObject = new THREE.Points(pointGeometry, pointMaterial); // Store reference
+            embeddingsGroup.add(pointsObject);
             console.log(`Rendered ${pointPositions.length / 3} embedding points.`);
+        } else {
+             pointsObject = null; // Ensure it's null if no points rendered
         }
-        // Log sprite counts
         console.log(`Rendered ${blueSpriteCount} top predicted words as blue text sprites.`);
         console.log(`Rendered ${greySpriteCount} other words as dark grey text sprites.`);
     }
@@ -458,6 +477,80 @@ document.addEventListener('DOMContentLoaded', function() {
              controls.target.copy(lastPointPos); // Look at the single point
              controls.update();
              console.log("Only one trajectory point, positioning camera nearby.");
+        }
+    }
+
+    // --- Click Interaction ---
+    function onMouseClick(event) {
+        // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+        mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+        // Update the picking ray with the camera and mouse position
+        raycaster.setFromCamera(mouse, camera);
+
+        // Check for intersections with the points object
+        if (pointsObject) {
+            // Set threshold for raycaster points intersection
+            raycaster.params.Points.threshold = config.size.points * 2; // Adjust threshold based on point size
+
+            const intersects = raycaster.intersectObject(pointsObject);
+
+            if (intersects.length > 0) {
+                const intersection = intersects[0];
+                const index = intersection.index; // Index of the clicked point
+
+                if (index >= 0 && index < pointEmbeddings.length) {
+                    const clickedEmbedding = pointEmbeddings[index];
+                    const word = clickedEmbedding.word;
+                    console.log(`Clicked point index: ${index}, word: ${word}`);
+
+                    removeTemporaryLabel(); // Use helper function
+
+                    // Create and display new label near the clicked point
+                    // Use the style of the regular sampled words
+                    const labelSprite = createTextSprite(word, {
+                        fontsize: config.font.baseSize,
+                        scale: config.scale.sampledWordSprite,
+                        fontColor: config.colors.sampledWordText, // Dark grey, 0.4 opacity
+                        drawBackground: false // No background
+                    });
+
+                    // Position the label slightly offset from the point
+                    labelSprite.position.copy(intersection.point).add(new THREE.Vector3(0, config.size.points * 3, 0)); // Offset slightly above
+
+                    currentlyDisplayedLabel = labelSprite;
+                    tempLabelGroup.add(currentlyDisplayedLabel);
+
+                } else {
+                     console.warn("Intersection index out of bounds:", index);
+                     removeTemporaryLabel(); // Remove old label if index is bad
+                 }
+            } else {
+                 removeTemporaryLabel(); // Remove label if click was not on a point
+             }
+        } else {
+             removeTemporaryLabel(); // Remove label if no points object exists
+         }
+    }
+
+    // --- Escape Key Interaction ---
+    function onEscapeKey(event) {
+        if (event.key === "Escape") {
+            console.log("Escape key pressed, removing temporary label.");
+            removeTemporaryLabel();
+        }
+    }
+
+    // --- Helper to remove temporary label ---
+    function removeTemporaryLabel() {
+        if (currentlyDisplayedLabel) {
+            tempLabelGroup.remove(currentlyDisplayedLabel);
+            // Dispose geometry/material of old label
+            if (currentlyDisplayedLabel.material.map) currentlyDisplayedLabel.material.map.dispose();
+            if (currentlyDisplayedLabel.material) currentlyDisplayedLabel.material.dispose();
+            // No geometry to dispose for sprites
+            currentlyDisplayedLabel = null;
         }
     }
 

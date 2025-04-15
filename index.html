@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opinion Dynamics Simulation</title>
+    <title>A Machine's Dream</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,32 +18,22 @@
 <body>
     <div class="content">
         <div class="text-block">
-            <h1>Social Consensus, Polarization, and the Power of Zealots</h1>
+            <h1>A Machine's Dream</h1>
             <div class="author">
-                <p>By Raj Saha, PhD</p>
+                <p>Raj Saha, PhD</p>
             </div>
             
             <p>
-                We're all familiar with the term <i>polarization</i> in the context of social consensus and political beliefs. The basic
-                premise is simple: repeated exposure to shared beliefs strengthens those beliefs, which in turn leads to even greater
-                exposure to similar views. This runaway effect then inevitably produces clusters of opposing beliefs - echo chambers.
+                How does an artificial intelligence, specifically a language model, "understand" text? While true understanding remains elusive, we can visualize how these models process information word by word. This visualization explores the internal state of a simple Recurrent Neural Network (LSTM) trained exclusively on the complete works of Edgar Allan Poe.
             </p>
             <p>
-                While the real world is vastly more complex, this basic mechanism remains a core driver of polarization. We can simulate
-                and visualize these dynamics using simple rules and assumptions. We can also explore the role of zealots - individuals who
-                are stubborn, never change their views, yet constantly proselytize - in shaping how consensus forms and evolves within a
-                social network.
+                The goal is to glimpse the model's "thought process" as it reads a phrase. We represent each word in the model's vocabulary as a point in a 3D space, derived from its learned 'embedding'. Words the model considers similar should appear closer together.
             </p>
             <p>
-                This simulation, inspired by Centola et al. (2018), models two groups of <i>N</i> agents, in proportions <i>k</i> and <i>(1−k)</i>, holding
-                opposing beliefs on a scale from −1 to +1. Positive and negative values represent the views of the two groups. Each
-                agent is connected to others - both within their group and, in some cases, across group lines - simulating a social network.
+                As the model reads the input phrase "dream within a dream", its internal state (or "thought point", shown as black text) moves through this 3D space. Lines connect this moving thought point to the words the model predicts are most likely to come next (shown in blue). This allows us to observe how context dynamically shifts the model's focus within its learned representation of Poe's language.
             </p>
             <p>
-                Agents interact pairwise through these connections. Each interaction may shift an agent's belief closer to the other's,
-                depending on various factors such as susceptibility and influence. However, zealots never change their views. Their
-                presence can stabilize, polarize, or even shift consensus in unexpected ways. Through this simulation, we can explore
-                how such simple interaction rules lead to complex collective behavior.
+                Click on the faint grey points to reveal the words they represent. Use your mouse to rotate, pan, and zoom the 3D space. Explore the machine's interpretation of Poe's haunting prose.
             </p>
         </div>
 
@@ -52,52 +42,28 @@
                 <div id="viz-loading-indicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Lato', sans-serif; color: #555;">Loading Visualization...</div>
                 <div id="pca-note-display" style="position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: #777; font-family: 'Lato', sans-serif; max-width: calc(100% - 20px);"></div>
             </div>
+            
         </div>
 
         <div class="text-block">
-            <h2>Assumptions</h2>
+            <h2>How It Works</h2>
             
-            <p>This simulation, like all models, makes several simplifying assumptions to help us understand complex social dynamics:</p>
+            <p>This visualization relies on several key steps:</p>
             
             <ul>
-                <li>People's beliefs exist on a continuous spectrum, not just binary categories</li>
-                <li>Social influence happens primarily through direct connections</li>
-                <li>People are more susceptible to opposing views when surrounded by them</li>
-                <li>Zealots never change their minds, regardless of social pressure</li>
-                <li>Network connections form with a bias toward similar opinions (homophily)</li>
-                <li>All non-zealot agents follow the same influence rules</li>
+                <li><strong>Training Data:</strong> A collection of Edgar Allan Poe's public domain works was used to train a simple LSTM language model.</li>
+                <li><strong>Word Embeddings:</strong> The model learns a vector representation (embedding) for each unique word. Similar words ideally have similar vectors.</li>
+                <li><strong>Dimensionality Reduction:</strong> These high-dimensional vectors are reduced to 3D using PCA (Principal Component Analysis) for visualization.</li>
+                <li><strong>Thought Vector:</strong> The LSTM maintains an internal hidden state vector that summarizes the sequence read so far. This is the "thought point".</li>
+                <li><strong>Trajectory:</strong> As the model processes the input phrase "dream within a dream", the 3D position of its thought point is tracked, creating a trajectory.</li>
+                <li><strong>Prediction:</strong> At each step, the model predicts the most likely next words based on its current thought point. Lines are drawn from the thought point to the top predicted words.</li>
             </ul>
             
-            <p>These assumptions create an idealized model that captures key aspects of opinion dynamics while remaining tractable. Real-world social systems are vastly more complex, with individuals following different influence rules, having varying susceptibilities, and interacting through multiple channels beyond direct connections.</p>
+            <p>The PCA reduction and the projection of the thought vector into the embedding space involve approximations. This visualization provides an intuitive glimpse, not a perfect representation, of the model's internal workings.</p>
             
-            <p>The model isn't meant to predict specific real-world outcomes, but rather to help us understand and visualize the mechanisms that might drive polarization and consensus formation in social networks.</p>
-            
-            <h2>Flipping the Minority</h2>
-            
-            <p>One of the most interesting phenomena this model reveals is how a minority opinion can sometimes overtake the majority.</p>
-            
-            <p>Two key factors determine whether this happens:</p>
-            
-            <ol>
-                <li><strong>Zealot proportions</strong>: When one side has more zealots than the other, they exert disproportionate influence. Even a small group of unwavering believers can gradually pull the entire population toward their view if the opposing side has fewer zealots.</li>
-                <li><strong>Network homophily</strong>: The degree to which people connect with like-minded others dramatically affects opinion spread. Higher homophily creates echo chambers that slow down opinion change, while lower homophily allows minority views to spread more easily through cross-group connections.</li>
-            </ol>
-            
-            <p>The interplay between these factors creates tipping points where small changes in initial conditions can lead to dramatically different outcomes. For example, a slight increase in red zealots might flip a predominantly blue population to red, even when starting with fewer red agents overall.</p>
-            
-            <p>This helps explain why seemingly stable social consensus can sometimes rapidly shift, and why vocal minorities can sometimes have outsized influence on public opinion.</p>
         </div>
 
-        <div class="text-block">
-            <div class="citation">
-                <p>
-                    <strong>Reference:</strong> Damon Centola, Joshua Becker, Devon Brackbill, and Andrea Baronchelli.
-                    "Experimental evidence for tipping points in social convention."
-                    <em>Science</em>, 360(6393), 1116-1119 (2018).
-                    DOI: <a href="https://doi.org/10.1126/science.aas8827" target="_blank">10.1126/science.aas8827</a>
-                </p>
-            </div>
-        </div>
+        
 
     </div>
 
@@ -136,11 +102,11 @@
     <!-- Load OrbitControls for Three.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-    <!-- Load existing JavaScript modules -->
-    <script src="js/agent.js"></script>
-    <script src="js/simulation.js"></script>
-    <script src="js/visualization.js"></script>
-    <script src="js/main.js"></script>
+    <!-- REMOVED old/unused JavaScript modules -->
+    <!-- <script src="js/agent.js"></script> -->
+    <!-- <script src="js/simulation.js"></script> -->
+    <!-- <script src="js/visualization.js"></script> -->
+    <!-- <script src="js/main.js"></script> -->
     <!-- Load NEW Poe visualization script -->
     <script src="js/poe_visualization.js"></script>
 </body>
